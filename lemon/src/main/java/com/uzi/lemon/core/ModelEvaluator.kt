@@ -1,6 +1,7 @@
 package com.uzi.lemon.core
 
 import android.content.Context
+import android.util.Log
 import com.uzi.lemon.metrics.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,6 +33,7 @@ class ModelEvaluator(
     private val context: Context,
     private val config: PerformanceConfig
 ) {
+    private val TAG = "ModelEvaluator"
     
     /**
      * Evaluate a model with the configured metrics
@@ -47,6 +49,9 @@ class ModelEvaluator(
         
         require(inputs.isNotEmpty()) { "Inputs list cannot be empty" }
         
+        Log.d(TAG, "Starting evaluation for model: $modelPath")
+        Log.d(TAG, "Configuration: ${config.metrics.size} metrics, ${config.iterations} iterations, ${config.warmupIterations} warmup")
+        
         // Load the model
         val module = EvaluableModule(context, modelPath).load()
         
@@ -55,39 +60,51 @@ class ModelEvaluator(
             val results = mutableMapOf<MetricType, Any>()
             
             config.metrics.forEach { metricType ->
-                when (metricType) {
-                    MetricType.LATENCY -> {
-                        val metric = LatencyMetric(
-                            iterations = config.iterations,
-                            warmupIterations = config.warmupIterations
-                        )
-                        results[metricType] = metric.measure(module, inputs)
+                Log.d(TAG, "Measuring metric: $metricType")
+                
+                try {
+                    when (metricType) {
+                        MetricType.LATENCY -> {
+                            val metric = LatencyMetric(
+                                iterations = config.iterations,
+                                warmupIterations = config.warmupIterations
+                            )
+                            results[metricType] = metric.measure(module, inputs)
+                            Log.d(TAG, "Latency measured: ${(results[metricType] as LatencyResult).mean} ms")
+                        }
+                        
+                        MetricType.MEMORY -> {
+                            val metric = MemoryMetric(context)
+                            results[metricType] = metric.measure(module, inputs)
+                            Log.d(TAG, "Memory measured: ${(results[metricType] as MemoryResult).peakPss} KB")
+                        }
+                        
+                        MetricType.THROUGHPUT -> {
+                            val metric = ThroughputMetric(iterations = config.iterations)
+                            results[metricType] = metric.measure(module, inputs)
+                            Log.d(TAG, "Throughput measured: ${(results[metricType] as ThroughputResult).samplesPerSecond} samples/sec")
+                        }
+                        
+                        MetricType.ENERGY -> {
+                            val metric = EnergyMetric(context)
+                            results[metricType] = metric.measure(module, inputs)
+                            Log.d(TAG, "Energy measured")
+                        }
+                        
+                        MetricType.MODEL_SIZE -> {
+                            val metric = ModelSizeMetric()
+                            results[metricType] = metric.measure(module, inputs)
+                            Log.d(TAG, "Model size measured: ${(results[metricType] as ModelSizeResult).sizeMB} MB")
+                        }
                     }
-                    
-                    MetricType.MEMORY -> {
-                        val metric = MemoryMetric(context)
-                        results[metricType] = metric.measure(module, inputs)
-                    }
-                    
-                    MetricType.THROUGHPUT -> {
-                        val metric = ThroughputMetric(iterations = config.iterations)
-                        results[metricType] = metric.measure(module, inputs)
-                    }
-                    
-                    MetricType.ENERGY -> {
-                        val metric = EnergyMetric(context)
-                        results[metricType] = metric.measure(module, inputs)
-                    }
-                    
-                    MetricType.MODEL_SIZE -> {
-                        val metric = ModelSizeMetric()
-                        results[metricType] = metric.measure(module, inputs)
-                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to measure metric $metricType", e)
+                    // Continue with other metrics
                 }
             }
             
             // Build evaluation result
-            EvaluationResult(
+            val result = EvaluationResult(
                 modelPath = modelPath,
                 backend = config.backend.name,
                 latency = results[MetricType.LATENCY] as? LatencyResult,
@@ -96,9 +113,21 @@ class ModelEvaluator(
                 energy = results[MetricType.ENERGY] as? EnergyResult,
                 modelSize = (results[MetricType.MODEL_SIZE] as? ModelSizeResult)?.sizeBytes
             )
+            
+            Log.d(TAG, "Evaluation completed successfully")
+            result
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Evaluation failed", e)
+            throw e
         } finally {
             // Clean up resources
-            module.release()
+            try {
+                module.release()
+                Log.d(TAG, "Module resources released")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error releasing module", e)
+            }
         }
     }
     
