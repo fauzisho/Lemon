@@ -26,7 +26,7 @@ object Lemon {
     /**
      * Library version
      */
-    const val VERSION = "0.1.0"
+    const val VERSION = "0.2.0"
     
     /**
      * Create a new evaluator builder
@@ -67,7 +67,6 @@ object Lemon {
                 MetricType.LATENCY,
                 MetricType.THROUGHPUT,
                 MetricType.MEMORY,
-                MetricType.ENERGY,
                 MetricType.MODEL_SIZE
             )
             .iterations(100)
@@ -86,7 +85,6 @@ object Lemon {
         fun latency() = apply { configBuilder.addMetric(MetricType.LATENCY) }
         fun memory() = apply { configBuilder.addMetric(MetricType.MEMORY) }
         fun throughput() = apply { configBuilder.addMetric(MetricType.THROUGHPUT) }
-        fun energy() = apply { configBuilder.addMetric(MetricType.ENERGY) }
         fun modelSize() = apply { configBuilder.addMetric(MetricType.MODEL_SIZE) }
         
         fun iterations(n: Int) = apply { configBuilder.iterations(n) }

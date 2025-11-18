@@ -155,18 +155,110 @@ class MainActivity : ComponentActivity() {
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // System State Card
+                        res.systemState?.let { state ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = "🖥️ System State",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    
+                                    Text(
+                                        text = "${state.device.manufacturer} ${state.device.model}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    Text(
+                                        text = "Android ${state.device.androidVersion} (API ${state.device.sdkInt})",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Thermal: ${state.thermal.thermalState}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = "${String.format("%.1f", state.thermal.temperature)}°C",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Battery: ${state.battery.level}%",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = if (state.battery.isCharging) "⚡ Charging" else "🔋 On Battery",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "CPU: ${state.cpu.coreCount} cores",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = state.cpu.governor,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "RAM: ${state.memory.availableRamMB} MB free",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = "${state.processes.runningProcessCount} processes",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
 
                         res.latency?.let { latency ->
                             MetricCard(
                                 title = "⏱️ Latency",
                                 metrics = listOf(
                                     "Mean" to "${String.format("%.3f", latency.mean)} ms",
+                                    "95% CI" to "[${String.format("%.3f", latency.confidenceInterval95.lower)}, ${String.format("%.3f", latency.confidenceInterval95.upper)}]",
                                     "Median" to "${String.format("%.3f", latency.median)} ms",
                                     "P95" to "${String.format("%.3f", latency.p95)} ms",
                                     "P99" to "${String.format("%.3f", latency.p99)} ms",
                                     "Min" to "${String.format("%.3f", latency.min)} ms",
                                     "Max" to "${String.format("%.3f", latency.max)} ms",
-                                    "StdDev" to "${String.format("%.3f", latency.stdDev)} ms"
+                                    "StdDev" to "${String.format("%.3f", latency.stdDev)} ms",
+                                    "CV" to "${String.format("%.2f", latency.coefficientOfVariation)}%",
+                                    "Outliers" to "${latency.outliersRemoved} / ${latency.totalSamples}"
                                 )
                             )
                         }
@@ -176,8 +268,9 @@ class MainActivity : ComponentActivity() {
                             MetricCard(
                                 title = "🚀 Throughput",
                                 metrics = listOf(
+                                    "FPS" to "${String.format("%.2f", throughput.fps)}",
                                     "Samples/sec" to "${String.format("%.2f", throughput.samplesPerSecond)}",
-                                    "Total Samples" to "${throughput.totalSamples}",
+                                    "Avg Latency" to "${String.format("%.2f", throughput.averageLatencyMs)} ms",
                                     "Total Time" to "${String.format("%.2f", throughput.totalTimeMs)} ms"
                                 )
                             )
@@ -189,6 +282,7 @@ class MainActivity : ComponentActivity() {
                                 title = "💾 Memory",
                                 metrics = listOf(
                                     "Peak PSS" to "${String.format("%.2f", memory.peakPss / 1024.0)} MB",
+                                    "Delta PSS" to "${String.format("%.2f", memory.deltaPss / 1024.0)} MB",
                                     "Peak RSS" to "${String.format("%.2f", memory.peakRss / 1024.0)} MB",
                                     "Native Heap" to "${String.format("%.2f", memory.nativeHeap / (1024.0 * 1024.0))} MB",
                                     "Java Heap" to "${String.format("%.2f", memory.javaHeap / (1024.0 * 1024.0))} MB"

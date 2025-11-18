@@ -10,11 +10,13 @@ interface Metric {
 
 /**
  * Types of metrics available in Lemon
+ * 
+ * Note: ENERGY metric removed - not reliable for micro-benchmarks (<10 seconds)
+ * Battery APIs don't have sufficient granularity for short inference measurements
  */
 enum class MetricType {
     LATENCY,
     THROUGHPUT,
     MEMORY,
-    ENERGY,
     MODEL_SIZE
 }

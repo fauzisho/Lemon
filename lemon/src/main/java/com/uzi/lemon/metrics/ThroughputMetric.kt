@@ -12,17 +12,21 @@ import org.pytorch.executorch.EValue
  */
 @Serializable
 data class ThroughputResult(
-    val samplesPerSecond: Double,
-    val totalSamples: Int,
-    val totalTimeMs: Double,
-    override val unit: String = "samples/sec"
+    val fps: Double,                    // Frames per second (real throughput)
+    val samplesPerSecond: Double,       // Same as FPS
+    val averageLatencyMs: Double,       // Average latency per inference
+    val totalSamples: Int,              // Total samples processed
+    val totalTimeMs: Double,            // Total time taken
+    override val unit: String = "FPS"
 ) : Metric {
     override val name: String = "Throughput"
     
     override fun toString(): String {
         return """
             Throughput Statistics:
-              Throughput: ${"%.2f".format(samplesPerSecond)} $unit
+              FPS: ${"%.2f".format(fps)}
+              Samples/sec: ${"%.2f".format(samplesPerSecond)}
+              Avg Latency: ${"%.2f".format(averageLatencyMs)} ms
               Total Samples: $totalSamples
               Total Time: ${"%.2f".format(totalTimeMs)} ms
         """.trimIndent()
@@ -30,7 +34,10 @@ data class ThroughputResult(
 }
 
 /**
- * Measures model inference throughput (samples per second)
+ * Measures model inference throughput (FPS / samples per second)
+ * 
+ * FIXED: Now calculates real FPS based on average latency per inference,
+ * not batch processing time.
  * 
  * @param iterations Number of inference iterations to measure
  */
@@ -41,9 +48,11 @@ class ThroughputMetric(
     /**
      * Measure throughput for the given module and inputs
      * 
+     * Calculates real FPS: 1000 / average_latency_ms
+     * 
      * @param module The evaluable module to measure
      * @param inputs List of input arrays to test with
-     * @return ThroughputResult containing throughput statistics
+     * @return ThroughputResult containing real throughput statistics
      */
     suspend fun measure(
         module: EvaluableModule,
@@ -52,20 +61,33 @@ class ThroughputMetric(
         
         require(inputs.isNotEmpty()) { "Inputs list cannot be empty" }
         
-        val startTime = System.nanoTime()
+        val latencies = mutableListOf<Long>()
+        val overallStartTime = System.nanoTime()
         
-        // Run all iterations
+        // Measure individual latencies
         repeat(iterations) {
             val input = inputs[it % inputs.size]
+            
+            val startTime = System.nanoTime()
             module.forward(*input)
+            val endTime = System.nanoTime()
+            
+            latencies.add(endTime - startTime)
         }
         
-        val endTime = System.nanoTime()
-        val totalTimeMs = (endTime - startTime) / 1_000_000.0
-        val samplesPerSecond = (iterations * 1000.0) / totalTimeMs
+        val overallEndTime = System.nanoTime()
+        
+        // Calculate statistics
+        val totalTimeMs = (overallEndTime - overallStartTime) / 1_000_000.0
+        val averageLatencyMs = latencies.average() / 1_000_000.0
+        
+        // Real FPS calculation: 1000 / average_latency
+        val fps = 1000.0 / averageLatencyMs
         
         ThroughputResult(
-            samplesPerSecond = samplesPerSecond,
+            fps = fps,
+            samplesPerSecond = fps,
+            averageLatencyMs = averageLatencyMs,
             totalSamples = iterations,
             totalTimeMs = totalTimeMs
         )
