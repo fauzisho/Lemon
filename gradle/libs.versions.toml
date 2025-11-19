@@ -29,6 +29,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 pytorch-executorch-android = { group = "org.pytorch", name = "executorch-android", version = "1.0.0" }
+pytorch-executorch-vulkan = { group = "org.pytorch", name = "executorch-android-vulkan", version = "1.0.0-rc2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

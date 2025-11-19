@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    // Use stable base package (matches your Python export version)
     api(libs.pytorch.executorch.android)
 
     // Lemon library for benchmarking
@@ -57,8 +58,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     
-    // ExecuTorch for model inference
-    implementation(libs.pytorch.executorch.android)
+    // SoLoader for loading native libraries
+    implementation("com.facebook.soloader:soloader:0.10.5")
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

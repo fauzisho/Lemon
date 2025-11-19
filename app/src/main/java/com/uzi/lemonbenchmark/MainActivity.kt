@@ -1,5 +1,6 @@
 package com.uzi.lemonbenchmark
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.uzi.lemon.Lemon
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
+        val context = LocalContext.current
 
         Column(
             modifier = modifier
@@ -71,6 +74,24 @@ class MainActivity : ComponentActivity() {
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Button to navigate to Multi-Benchmark Activity
+            Button(
+                onClick = {
+                    val intent = Intent(context, MultiBenchmarkActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text("📊 Benchmark All 10 Models")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -103,7 +124,7 @@ class MainActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Running Benchmark...")
                 } else {
-                    Text("Run Benchmark")
+                    Text("Run Single Model Benchmark")
                 }
             }
 
