@@ -61,16 +61,16 @@ class MultiBenchmarkActivity : ComponentActivity() {
     // This will help us isolate the issue
     private val modelList = listOf(
         // CPU Models - Portable only (safest, no optimizations)
-        "mv2_portable_fp32.pte",
-        "mv3_portable_fp32.pte",
-        "mv2_xnnpack_fp32.pte",
-        "mv2_xnnpack_int8_pt2e.pte",
-        "mv3_xnnpack_fp32.pte",
-        "mv3_xnnpack_int8_pt2e.pte",
-        // "mv2_vulkan_fp16.pte",
-        // "mv2_vulkan_fp32.pte",
-        // "mv3_vulkan_fp16.pte",
-        // "mv3_vulkan_fp32.pte"
+//        "mv2_portable_fp32.pte",
+//        "mv3_portable_fp32.pte",
+//        "mv2_xnnpack_fp32.pte",
+//        "mv2_xnnpack_int8_pt2e.pte",
+//        "mv3_xnnpack_fp32.pte",
+//        "mv3_xnnpack_int8_pt2e.pte",
+//         "mv2_vulkan_fp16.pte",
+//        "mv2_vulkan_fp32.pte",
+        "mv3_vulkan_fp32.pte",
+//        "mv3_vulkan_fp16.pte",
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

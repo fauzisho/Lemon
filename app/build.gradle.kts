@@ -41,7 +41,8 @@ android {
 
 dependencies {
     // Use stable base package (matches your Python export version)
-    api(libs.pytorch.executorch.android)
+//    api(libs.pytorch.executorch.android)
+    api(libs.pytorch.executorch.vulkan)
 
     // Lemon library for benchmarking
     implementation(project(":lemon"))

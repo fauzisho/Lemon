@@ -34,7 +34,8 @@ android {
 
 dependencies {
     // Use stable base package (matches your Python export version)
-    api(libs.pytorch.executorch.android)
+//    api(libs.pytorch.executorch.android)
+    api(libs.pytorch.executorch.vulkan)
     implementation("com.facebook.soloader:soloader:0.10.5")
     implementation("com.facebook.fbjni:fbjni:0.5.1")
 
