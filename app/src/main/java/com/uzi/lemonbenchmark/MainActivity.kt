@@ -1,5 +1,6 @@
 package com.uzi.lemonbenchmark
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -105,6 +106,28 @@ class MainActivity : ComponentActivity() {
                 } else {
                     Text("Run Benchmark")
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    try {
+                        val intent = Intent(this@MainActivity, PersonDetectionActivity::class.java)
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to start PersonDetectionActivity: ${e.message}")
+                        error = "Activity not found: ${e.message}"
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text("🎯 Person Detection (Fixed)")
             }
 
             Spacer(modifier = Modifier.height(24.dp))

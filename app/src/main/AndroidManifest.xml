@@ -22,6 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Person Detection Benchmark Activity -->
+        <activity
+            android:name=".PersonDetectionActivity"
+            android:exported="true"
+            android:label="Person Detection Benchmark"
+            android:theme="@style/Theme.LemonBenchmark">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
